@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import openai
 import allocation
 
+#ChNGED
 class BudgetWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -38,18 +39,7 @@ class BudgetWindow(QWidget):
         ax.set_title('Current Balance Distribution')
         ax.set_xticklabels(balance_labels, rotation=10)
 
-        print(allocation.user['Plan'])
-
-        # # Add padding to the x-axis labels
-        # ax.tick_params(axis='x', pad=15)
-
-        # # Set the figure size
-        # self.figure.set_size_inches(8, 4)
-
         self.canvas.draw()
-
-
-
 
 class ChatWindow(QWidget):
     current_messages = []
