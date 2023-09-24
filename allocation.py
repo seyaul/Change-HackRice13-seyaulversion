@@ -4,17 +4,16 @@ import numpy as np
 balance = {"Liquid": 0, "ST Fixed Income": 0, "LT Fixed Income": 0, "ETF": 0, "Tech": 0, "CurrRetirement": 0}
 
 
-user = {"Salary": None, "Age": None, "Plan": None}
+user = {"Salary": None, "Age": None, "Plan": 'Default'}
 
-
-return_matrix = [.1, 5, 4.2, 9, 15, 6] # APY
+deposit = 0
 
 
 young_default = np.array([0, 10, 20, 70])
 mid_age_default = np.array([0, 25, 35, 40])
 old_default = np.array([80, 0, 20, 0])
 to_interpolate = [young_default, mid_age_default, old_default]
-start_mid_end_ages = [18,42,65]
+ages = [18,42,65]
 
 
 high_risk_LT = np.array([0, 10, 20, 70])/100
@@ -97,30 +96,3 @@ def allocate(balance, deposit, user):
 
 
     return balance
-
-
-start_vector = np.array([0, 10, 20, 70])
-middle_vector = np.array([0, 25, 35, 40])
-end_vector = np.array([80, 0, 20, 0])
-
-
-num_interpolations = 47
-step_size = 1.0 / (num_interpolations + 1)
-
-
-interpolated_vectors = []
-
-
-for i in range(1, num_interpolations + 1):
-    alpha = i * step_size
-    interpolated_vector = (1 - alpha) * (1 - alpha) * start_vector + 2 * (1 - alpha) * alpha * middle_vector + alpha * alpha * end_vector
-    interpolated_vectors.append(interpolated_vector)
-
-
-# Now, interpolated_vectors contains your 47 interpolated vectors.
-err = 0
-
-print(len(interpolated_vectors))
-
-for i in range(len(interpolated_vectors)-1):
-    print(sum(interpolated_vectors[i] - interpolate_plan(to_interpolate, start_mid_end_ages,i+19)))
