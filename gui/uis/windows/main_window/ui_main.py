@@ -209,7 +209,7 @@ class UI_MainWindow(object):
             context_color = self.themes["app_color"]["context_color"],
             dark_one = self.themes["app_color"]["dark_one"],
             text_foreground = self.themes["app_color"]["text_foreground"],
-            radius = 0,
+            radius = 8,
             font_family = self.settings["font"]["family"],
             title_size = self.settings["font"]["title_size"],
             is_custom_title_bar = self.settings["custom_title_bar"]
