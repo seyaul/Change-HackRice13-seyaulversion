@@ -1,0 +1,333 @@
+# ///////////////////////////////////////////////////////////////
+#
+# BY: WANDERSON M.PIMENTA
+# PROJECT MADE WITH: Qt Designer and PySide6
+# V: 1.0.0
+#
+# This project can be used freely for all uses, as long as they maintain the
+# respective credits only in the Python scripts, any information in the visual
+# interface (GUI) can be modified without any implication.
+#
+# There are limitations on Qt licenses if you want to use your products
+# commercially, I recommend reading them on the official website:
+# https://doc.qt.io/qtforpython/licenses.html
+#
+# ///////////////////////////////////////////////////////////////
+
+# IMPORT QT CORE
+# ///////////////////////////////////////////////////////////////
+from qt_core import *
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QTextEdit, QFormLayout, QHBoxLayout, QComboBox
+from PySide6.QtGui import QPixmap
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import matplotlib.pyplot as plt
+import openai
+import gui.uis.pages.allocation as allocation
+
+class Ui_MainPages(object):
+    #updating events, not part of original code and delete if doesn;t work
+    def update_deposit(self):
+        deposit = int(self.deposit_field.text())
+        allocation.deposit = deposit
+
+    def update_risk(self, index):
+        selected_option = self.risk_level_combobox.itemText(index)
+        allocation.user['Plan'] = selected_option
+
+    def update_age(self):
+        age = int(self.age_field.text())
+        allocation.user['Age'] = age
+
+    def update_salary(self):
+        salary = int(self.salary_field.text())
+        allocation.user['Salary'] = salary
+
+    def open_budget_window(self):
+        self.budget_window = BudgetWindow()
+        self.budget_window.show()
+    
+    def open_chat_window(self):
+        self.chat_window = ChatWindow()
+        self.chat_window.show()
+
+
+#BudgetWindow, not part of original Ui, delete if doesn't work
+class BudgetWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QVBoxLayout()
+        plt.rcParams["figure.figsize"] = (8, 4)
+        
+        self.update_button = QPushButton("Update Chart")
+        self.figure = Figure()
+        self.canvas = FigureCanvasQTAgg(self.figure)
+        
+        self.layout.addWidget(self.update_button)
+        self.layout.addWidget(self.canvas)
+        
+        self.update_button.clicked.connect(self.update_chart)
+        
+        self.setLayout(self.layout)
+
+
+#new test code (delete if doesnt work)
+        # self.update_button = QPushButton("Update Chart")
+        # self.figure = Figure()
+        # self.canvas = FigureCanvasQTAgg(self.figure)
+        
+        # self.layout.addWidget(self.update_button)
+        # self.layout.addWidget(self.canvas)
+        
+        # self.update_button.clicked.connect(self.update_chart)
+        
+        # self.setLayout(self.layout)
+
+    
+        
+    def update_chart(self):
+        allocation.allocate(allocation.balance, allocation.deposit, allocation.user)
+
+        balance_data = list(allocation.balance.values())
+        balance_labels = list(allocation.balance.keys())
+
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        ax.bar(balance_labels, balance_data)
+        ax.set_xlabel('Balance Types')
+        ax.set_ylabel('Amount')
+        ax.set_title('Current Balance Distribution')
+        ax.set_xticklabels(balance_labels, rotation=10)
+
+        self.canvas.draw()
+
+    def setupUi(self, MainPages):
+        if not MainPages.objectName():
+            MainPages.setObjectName(u"MainPages")
+        MainPages.resize(860, 600)
+        self.main_pages_layout = QVBoxLayout(MainPages)
+        self.main_pages_layout.setSpacing(0)
+        self.main_pages_layout.setObjectName(u"main_pages_layout")
+        self.main_pages_layout.setContentsMargins(5, 5, 5, 5)
+        self.pages = QStackedWidget(MainPages)
+        self.pages.setObjectName(u"pages")
+        self.page_1 = QWidget()
+        self.page_1.setObjectName(u"page_1")
+        self.page_1.setStyleSheet(u"font-size: 14pt")
+        self.page_1_layout = QVBoxLayout(self.page_1)
+        self.page_1_layout.setSpacing(5)
+        self.page_1_layout.setObjectName(u"page_1_layout")
+        self.page_1_layout.setContentsMargins(5, 5, 5, 5)
+        self.welcome_base = QFrame(self.page_1)
+        self.welcome_base.setObjectName(u"welcome_base")
+        self.welcome_base.setMinimumSize(QSize(300, 150))
+        self.welcome_base.setMaximumSize(QSize(300, 150))
+        self.welcome_base.setFrameShape(QFrame.NoFrame)
+        self.welcome_base.setFrameShadow(QFrame.Raised)
+        self.center_page_layout = QVBoxLayout(self.welcome_base)
+        self.center_page_layout.setSpacing(10)
+        self.center_page_layout.setObjectName(u"center_page_layout")
+        self.center_page_layout.setContentsMargins(0, 0, 0, 0)
+        self.logo = QFrame(self.welcome_base)
+        self.logo.setObjectName(u"logo")
+        self.logo.setMinimumSize(QSize(300, 120))
+        self.logo.setMaximumSize(QSize(300, 120))
+        self.logo.setFrameShape(QFrame.NoFrame)
+        self.logo.setFrameShadow(QFrame.Raised)
+        self.logo_layout = QVBoxLayout(self.logo)
+        self.logo_layout.setSpacing(0)
+        self.logo_layout.setObjectName(u"logo_layout")
+        self.logo_layout.setContentsMargins(0, 0, 0, 0)
+
+        self.center_page_layout.addWidget(self.logo)
+
+        self.label = QLabel(self.welcome_base)
+        self.label.setObjectName(u"label")
+        self.label.setAlignment(Qt.AlignCenter)
+
+        self.center_page_layout.addWidget(self.label)
+
+
+        self.page_1_layout.addWidget(self.welcome_base, 0, Qt.AlignHCenter)
+
+        self.pages.addWidget(self.page_1)
+        self.page_2 = QWidget()
+        self.page_2.setObjectName(u"page_2")
+        self.page_2_layout = QVBoxLayout(self.page_2)
+        self.page_2_layout.setSpacing(5)
+        self.page_2_layout.setObjectName(u"page_2_layout")
+        self.page_2_layout.setContentsMargins(5, 5, 5, 5)
+        self.scroll_area = QScrollArea(self.page_2)
+        self.scroll_area.setObjectName(u"scroll_area")
+        self.scroll_area.setStyleSheet(u"background: transparent;")
+        self.scroll_area.setFrameShape(QFrame.NoFrame)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.setWidgetResizable(True)
+        self.contents = QWidget()
+        self.contents.setObjectName(u"contents")
+        self.contents.setGeometry(QRect(0, 0, 840, 580))
+        self.contents.setStyleSheet(u"background: transparent;")
+        self.verticalLayout = QVBoxLayout(self.contents)
+        self.verticalLayout.setSpacing(15)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
+        self.title_label = QLabel(self.contents)
+        self.title_label.setObjectName(u"title_label")
+        self.title_label.setMaximumSize(QSize(16777215, 40))
+        font = QFont()
+        font.setPointSize(16)
+        self.title_label.setFont(font)
+        self.title_label.setStyleSheet(u"font-size: 16pt")
+        self.title_label.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout.addWidget(self.title_label)
+
+        self.description_label = QLabel(self.contents)
+        self.description_label.setObjectName(u"description_label")
+        self.description_label.setAlignment(Qt.AlignHCenter|Qt.AlignTop)
+        self.description_label.setWordWrap(True)
+
+        self.verticalLayout.addWidget(self.description_label)
+
+        self.row_1_layout = QHBoxLayout()
+        self.row_1_layout.setObjectName(u"row_1_layout")
+
+        self.verticalLayout.addLayout(self.row_1_layout)
+
+        self.row_2_layout = QHBoxLayout()
+        self.row_2_layout.setObjectName(u"row_2_layout")
+
+        self.verticalLayout.addLayout(self.row_2_layout)
+
+        self.row_3_layout = QHBoxLayout()
+        self.row_3_layout.setObjectName(u"row_3_layout")
+
+        self.verticalLayout.addLayout(self.row_3_layout)
+
+        self.row_4_layout = QVBoxLayout()
+        self.row_4_layout.setObjectName(u"row_4_layout")
+
+        self.verticalLayout.addLayout(self.row_4_layout)
+
+        self.row_5_layout = QVBoxLayout()
+        self.row_5_layout.setObjectName(u"row_5_layout")
+
+        self.verticalLayout.addLayout(self.row_5_layout)
+
+        self.scroll_area.setWidget(self.contents)
+
+        self.page_2_layout.addWidget(self.scroll_area)
+
+        self.pages.addWidget(self.page_2)
+
+
+        #page 3
+#         self.page_3 = QWidget()
+#         self.page_3.setObjectName(u"page_3")
+#         self.page_3.setStyleSheet(u"QFrame {\n"
+# "	font-size: 16pt;\n"
+# "}")
+#         self.page_3_layout = QVBoxLayout(self.page_3)
+#         self.page_3_layout.setObjectName(u"page_3_layout")
+#         self.empty_page_label = QLabel(self.page_3)
+#         self.empty_page_label.setObjectName(u"empty_page_label")
+#         self.empty_page_label.setFont(font)
+#         self.empty_page_label.setAlignment(Qt.AlignCenter)
+
+#         self.page_3_layout.addWidget(self.empty_page_label)
+
+#         self.pages.addWidget(self.page_3)
+
+        self.page_3 = QWidget()
+        self.page_3.setObjectName(u"page_3")
+        self.page_3.setStyleSheet(u"QFrame {\n"
+                                    "	font-size: 16pt;\n"
+                                    "}")
+        self.page_3_layout = QVBoxLayout(self.page_3)
+        self.page_3_layout.setObjectName(u"page_3_layout")
+
+        # Add your code for the new page here
+        self.layout = QVBoxLayout()
+        self.layout.setSpacing(5)
+
+        self.age_layout = QFormLayout()
+        self.age_label = QLabel("Age:")
+        self.age_field = QLineEdit()
+        self.age_field.editingFinished.connect(self.update_age)
+        self.age_layout.addRow(self.age_label, self.age_field)
+        self.layout.addLayout(self.age_layout)
+
+        self.deposit_layout = QFormLayout()
+        self.deposit_label = QLabel("Balance Deposit:")
+        self.deposit_field = QLineEdit()
+        self.deposit_field.editingFinished.connect(self.update_deposit)
+        self.deposit_layout.addRow(self.deposit_label, self.deposit_field)
+        self.layout.addLayout(self.deposit_layout)
+
+        self.salary_layout = QFormLayout()
+        self.salary_label = QLabel("Salary:")
+        self.salary_field = QLineEdit()
+        self.salary_field.editingFinished.connect(self.update_salary)
+        self.salary_layout.addRow(self.salary_label, self.salary_field)
+        self.layout.addLayout(self.salary_layout)
+
+        self.plan_layout = QFormLayout()
+        self.plan_label = QLabel("Plan:")
+        self.risk_level_combobox = QComboBox()
+        self.risk_level_combobox.addItem("Default")
+        self.risk_level_combobox.addItem("High Risk Long Term")
+        self.risk_level_combobox.addItem("Low Risk Long Term")
+        self.risk_level_combobox.addItem("High Risk Short Term")
+        self.risk_level_combobox.addItem("Low Risk Short Term")
+        self.risk_level_combobox.currentIndexChanged.connect(self.update_risk)
+        self.plan_layout.addRow(self.plan_label, self.risk_level_combobox)
+        self.layout.addLayout(self.plan_layout)
+
+        self.chat_button = QPushButton("Go to Chat", self)
+        self.chat_button.setStyleSheet('QPushButton {border: 1px solid black;}')
+        self.chat_button.clicked.connect(self.open_chat_window)
+
+        self.button = QPushButton("Go to Budget", self)
+        self.button.setStyleSheet('QPushButton {border: 1px solid black;}')
+        self.button.clicked.connect(self.open_budget_window)
+
+        self.layout.addWidget(self.chat_button)
+        self.layout.addWidget(self.button)
+
+        self.main_layout = QVBoxLayout()
+        self.main_layout.addLayout(self.top_layout)
+        self.main_layout.addLayout(self.layout)
+
+        central_widget = QWidget()
+        central_widget.setLayout(self.main_layout)
+        self.setCentralWidget(central_widget)
+
+        # Add the newly created page to the pages widget
+        self.pages.addWidget(self.page_3)
+
+
+#main page stuff?
+        self.main_pages_layout.addWidget(self.pages)
+
+
+        self.retranslateUi(MainPages)
+
+        self.pages.setCurrentIndex(0)
+
+
+        QMetaObject.connectSlotsByName(MainPages)
+    # setupUi
+######### Important to change 
+    def retranslateUi(self, MainPages):
+        MainPages.setWindowTitle(QCoreApplication.translate("MainPages", u"Form", None))
+        self.label.setText(QCoreApplication.translate("MainPages", u"Change Banking For the Better.", None))
+        self.title_label.setText(QCoreApplication.translate("MainPages", u"Custom Widgets Page", None))
+        self.description_label.setText(QCoreApplication.translate("MainPages", u"Here will be all the custom widgets, they will be added over time on this page.\n"
+"I will try to always record a new tutorial when adding a new Widget and updating the project on Patreon before launching on GitHub and GitHub after the public release.", None))
+        self.empty_page_label.setText(QCoreApplication.translate("MainPages", u"Empty Page", None))
+    # retranslateUi
+
+
+
+
