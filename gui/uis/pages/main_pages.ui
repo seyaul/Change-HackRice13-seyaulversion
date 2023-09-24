@@ -132,7 +132,7 @@
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Change Banking For the Better.</string>
+             <string>Change Banking For The Better.</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
