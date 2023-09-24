@@ -1,110 +1,17 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLineEdit, QWidget, QLabel, QTextEdit, QFormLayout, QHBoxLayout, QComboBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLineEdit, QWidget, QLabel, QTextEdit, QFormLayout, QHBoxLayout, QComboBox, QGridLayout
 from PyQt5.QtGui import QPixmap
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import matplotlib.pyplot as plt
 import openai
 import allocation
-
-#ChNGED
-class BudgetWindow(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.layout = QVBoxLayout()
-        plt.rcParams["figure.figsize"] = (8, 4)
-        
-        self.update_button = QPushButton("Update Chart")
-        self.figure = Figure()
-        self.canvas = FigureCanvasQTAgg(self.figure)
-        
-        self.layout.addWidget(self.update_button)
-        self.layout.addWidget(self.canvas)
-        
-        self.update_button.clicked.connect(self.update_chart)
-        
-        self.setLayout(self.layout)
-        
-    def update_chart(self):
-        allocation.allocate(allocation.balance, allocation.deposit, allocation.user)
-
-        balance_data = list(allocation.balance.values())
-        balance_labels = list(allocation.balance.keys())
-
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        ax.bar(balance_labels, balance_data)
-        ax.set_xlabel('Balance Types')
-        ax.set_ylabel('Amount')
-        ax.set_title('Current Balance Distribution')
-        ax.set_xticklabels(balance_labels, rotation=10)
-
-        self.canvas.draw()
-
-class ChatWindow(QWidget):
-    current_messages = []
-    current_messages.append({"role": "system", "content": 
-                             "You are a talented financial assistant, answering financial literacy questions with expert ability. You can provide information on how to make smart financial decision, and information on financial institutions in general. Limit all your responses to a few paragraphs AT MOST, you want to express the information in a clear and concise way, while limiting the amount of characters used."})
-    
-    
-    def __init__(self):
-        super().__init__()
-        
-        self.setGeometry(100, 100, 400, 400)
-
-        self.layout = QVBoxLayout()
-
-        self.chat_log = QTextEdit()
-        self.chat_log.setReadOnly(True)
-
-        self.user_input = QLineEdit()
-        self.user_input.returnPressed.connect(self.update_chat)
-
-        self.layout.addWidget(self.chat_log)
-        self.layout.addWidget(self.user_input)
-
-        self.setLayout(self.layout)
-
-        openai.api_key = ''
-
-        self.chat_log.append("Meet our AI-powered financial advisor, willing to answer any and all financial questions!")
-        self.chat_log.append(' ')
-
-    def update_chat(self):
-
-        user_message = self.user_input.text()
-        self.chat_log.append(f'<strong>User:</strong> {user_message}\n\n')
-        self.chat_log.append(' ')
-
-
-        # creating message dict
-        message_as_dict = {"role": "user", "content": user_message}
-
-        # adding new message as dict to list of messages
-        self.current_messages.append(message_as_dict)
-
-        # creating chat model with updated list of messages
-        completion = openai.ChatCompletion.create(
-            model = "gpt-3.5-turbo",
-            messages = self.current_messages
-        )
-
-        # getting model reply
-        reply = completion.choices[0].message
-
-        # updating list of messages with model's reply
-        self.current_messages.append(reply)
-
-        # returning model's reply
-    
-        self.chat_log.append(f'<strong>&cent;hange Advisor:</strong> {reply["content"]}\n\n')
-        self.chat_log.append(' ')
-        self.user_input.clear()
+import analysis
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        
         self.setGeometry(400, 400 ,400, 600)
 
         # Create a horizontal layout for the logo and other widgets
@@ -168,6 +75,8 @@ class MainWindow(QMainWindow):
         self.chat_button.setStyleSheet('QPushButton {border: 1px solid black;}')
         self.chat_button.clicked.connect(self.open_chat_window)
 
+
+
         # Budget screen button
         self.button = QPushButton("Go to Budget", self)
         self.button.setStyleSheet('QPushButton {border: 1px solid black;}')
@@ -186,6 +95,8 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(self.main_layout)
         self.setCentralWidget(central_widget)
 
+        app.setStyle('Oxygen')
+
 
     def update_deposit(self):
         deposit = int(self.deposit_field.text())
@@ -202,6 +113,7 @@ class MainWindow(QMainWindow):
     def update_salary(self):
         salary = int(self.salary_field.text())
         allocation.user['Salary'] = salary
+        
 
 
     def open_budget_window(self):
@@ -212,6 +124,166 @@ class MainWindow(QMainWindow):
     def open_chat_window(self):
         self.chat_window = ChatWindow()
         self.chat_window.show()
+
+class BudgetWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.layout = QGridLayout()
+        plt.rcParams["figure.figsize"] = (12, 4)
+        
+        self.update_button = QPushButton("Update Chart")
+        self.currentBalanceFigure = Figure(figsize=(10, 4))
+        self.canvas = FigureCanvasQTAgg(self.currentBalanceFigure)
+        
+        self.balance_allocation_figure = Figure(figsize=(10, 4))
+        self.balance_allocation_canvas = FigureCanvasQTAgg(self.balance_allocation_figure)
+
+        self.next_month_button = QPushButton("Next Month")
+
+        self.chart_layout = QVBoxLayout()
+        self.chart_layout.addWidget(self.canvas)
+        self.chart_layout.addWidget(self.balance_allocation_canvas)
+        self.chart_layout.addStretch(1)
+
+        self.layout.addWidget(self.update_button, 0, 0)
+        self.layout.addLayout(self.chart_layout, 1, 0)
+        self.layout.addWidget(self.next_month_button, 2, 0)
+        
+        self.update_button.clicked.connect(self.update_chart)
+        self.next_month_button.clicked.connect(self.next_month_chart)
+        
+        self.setLayout(self.layout)
+
+    month_counter = 1  
+    def update_chart(self):
+        allocation.allocate(allocation.balance, allocation.deposit, allocation.user)
+
+        balance_data = list(allocation.balance.values())
+        balance_labels = list(allocation.balance.keys())
+
+        self.currentBalanceFigure.clear()
+        ax = self.currentBalanceFigure.add_subplot(111)
+        bars_current = ax.bar(balance_labels, balance_data)
+        ax.set_xlabel('Balance Types')
+        ax.set_ylabel('Amount')
+        ax.set_title('Current Balance Distribution')
+        ax.set_xticklabels(balance_labels, rotation=0)
+        self.currentBalanceFigure.tight_layout()
+        
+        for bar in bars_current:
+            height = bar.get_height()
+            rounded_height = round(height, 2)
+            formatted_height = f'${rounded_height:,.2f}'
+            ax.text(bar.get_x() + bar.get_width() / 2, height / 2, formatted_height, ha='center', va='bottom')
+
+        self.balance_allocation_figure.clear()
+        ax = self.balance_allocation_figure.add_subplot(111)
+        bars_allocation = ax.bar(balance_labels, balance_data)
+        ax.set_xlabel('Balance Types')
+        ax.set_ylabel('Amount')
+        ax.set_title('Balance Allocation After '+ str(self.month_counter) + ' Month(s)')
+        ax.set_xticklabels(balance_labels, rotation=0)
+        self.balance_allocation_figure.tight_layout()  # Add tight_layout here
+
+        for bar in bars_allocation:
+            height = bar.get_height()
+            rounded_height = round(height, 2)
+            formatted_height = f'${rounded_height:,.2f}'
+            ax.text(bar.get_x() + bar.get_width() / 2, height / 2, formatted_height, ha='center', va='bottom')
+
+        self.canvas.draw()
+        self.balance_allocation_canvas.draw()
+    
+    
+
+    def next_month_chart(self):
+        self.month_counter+=1
+        balance_dict = analysis.compound_allocate(allocation.balance, allocation.user)
+        balance_data = list(balance_dict.values())
+        balance_labels = list(balance_dict.keys())
+
+        self.balance_allocation_figure.clear()
+        ax = self.balance_allocation_figure.add_subplot(111)
+        bars = ax.bar(balance_labels, balance_data)
+        ax.set_xlabel('Balance Types')
+        ax.set_ylabel('Amount')
+        ax.set_title('Balance Allocation After '+ str(self.month_counter) + ' Month(s)')
+        ax.set_xticklabels(balance_labels, rotation=0)
+        self.balance_allocation_figure.tight_layout()  # Add tight_layout here
+
+        for bar in bars:
+            height = bar.get_height()
+            rounded_height = round(height, 2)
+            formatted_height = f'${rounded_height:,.2f}'
+            ax.text(bar.get_x() + bar.get_width() / 2, height / 2, formatted_height, ha='center', va='bottom')
+
+        self.canvas.draw()
+        self.balance_allocation_canvas.draw()
+        
+
+class ChatWindow(QWidget):
+    current_messages = []
+    with open("allocation.py", "r") as file:
+        code_contents = file.read()
+    prompt  = (f"You are a talented financial assistant, answering financial literacy questions with expert ability. You can provide information on how to make smart financial decision, and information on financial institutions in general. Limit all your responses to a few paragraphs AT MOST, you want to express the information in a clear and concise way, while limiting the amount of characters used. Here are the contents of my algorithm that distributes inputted money:\n\n{code_contents}\n\n. The current balance distribution is: " + str(allocation.balance) +". If users ask about the logistics behind the allocation of funds, do not explain the algorithmic details, but explain the theory behind it. For example, its better to invest more riskly for long-term when your young, and viceversa when your old, explaining how our algorithm is somewhat of a gradient. Remeber, you are a financial expert and know why the algorithm makes the financial decisions it does, defend these decisions. Do not try to explicitly describe how the algorithm works, rather the financial reasoning why. Remember to keep your answers brief but clear and effedtive, trying to save")
+    current_messages.append({"role":"system", "content": prompt})
+    
+    
+    def __init__(self):
+        super().__init__()
+        
+        self.setGeometry(100, 100, 400, 400)
+
+        self.layout = QVBoxLayout()
+
+        self.chat_log = QTextEdit()
+        self.chat_log.setReadOnly(True)
+
+        self.user_input = QLineEdit()
+        self.user_input.returnPressed.connect(self.update_chat)
+
+        self.layout.addWidget(self.chat_log)
+        self.layout.addWidget(self.user_input)
+
+        self.setLayout(self.layout)
+
+        openai.api_key = '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'
+
+        self.chat_log.append("Meet our AI-powered financial advisor, willing to answer any and all financial questions!")
+        self.chat_log.append(' ')
+
+    def update_chat(self):
+       
+        self.current_messages.append({'role': 'user', 'content': "The current balance distribution is " + str(allocation.balance) +"."})
+
+        user_message = self.user_input.text()
+        self.chat_log.append(f'<strong>User:</strong> {user_message}\n\n')
+        self.chat_log.append(' ')
+
+
+        # creating message dict
+        message_as_dict = {"role": "user", "content": user_message}
+
+        # adding new message as dict to list of messages
+        self.current_messages.append(message_as_dict)
+
+        # creating chat model with updated list of messages
+        completion = openai.ChatCompletion.create(
+            model = "gpt-3.5-turbo",
+            messages = self.current_messages
+        )
+
+        # getting model reply
+        reply = completion.choices[0].message
+
+        # updating list of messages with model's reply
+        self.current_messages.append(reply)
+
+        # returning model's reply
+    
+        self.chat_log.append(f'<strong>&cent;hange Advisor:</strong> {reply["content"]}\n\n')
+        self.chat_log.append(' ')
+        self.user_input.clear()
 
 app = QApplication(sys.argv)
 main_window = MainWindow()
