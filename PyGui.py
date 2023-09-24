@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 import openai
 import allocation
 import analysis
+import financials
+from matplotlib.ticker import FormatStrFormatter, StrMethodFormatter
+import copy
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -22,7 +25,7 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap('logo.png')
         self.logo_label.setPixmap(pixmap)
         self.logo_label.setScaledContents(True)
-        self.logo_label.setFixedSize(300, 300)
+        self.logo_label.setFixedSize(450, 200)
         self.top_layout.addWidget(self.logo_label)
 
         # Create a vertical layout for the input fields and buttons
@@ -113,6 +116,7 @@ class MainWindow(QMainWindow):
     def update_salary(self):
         salary = int(self.salary_field.text())
         allocation.user['Salary'] = salary
+        allocation.balance['Liquid'] = salary * 0.4
         
 
 
@@ -125,36 +129,43 @@ class MainWindow(QMainWindow):
         self.chat_window = ChatWindow()
         self.chat_window.show()
 
+
 class BudgetWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.layout = QGridLayout()
-        plt.rcParams["figure.figsize"] = (12, 4)
-        
+        self.layout = QVBoxLayout()
+
         self.update_button = QPushButton("Update Chart")
-        self.currentBalanceFigure = Figure(figsize=(10, 4))
+        self.layout.addWidget(self.update_button)
+
+        self.currentBalanceFigure = Figure(figsize=(10, 16))
         self.canvas = FigureCanvasQTAgg(self.currentBalanceFigure)
-        
-        self.balance_allocation_figure = Figure(figsize=(10, 4))
-        self.balance_allocation_canvas = FigureCanvasQTAgg(self.balance_allocation_figure)
+        self.layout.addWidget(self.canvas)
 
         self.next_month_button = QPushButton("Next Month")
+        self.layout.addWidget(self.next_month_button)
 
-        self.chart_layout = QVBoxLayout()
-        self.chart_layout.addWidget(self.canvas)
-        self.chart_layout.addWidget(self.balance_allocation_canvas)
-        self.chart_layout.addStretch(1)
+        self.balance_allocation_figure = Figure(figsize=(10, 16))
+        self.balance_allocation_canvas = FigureCanvasQTAgg(self.balance_allocation_figure)
+        self.layout.addWidget(self.balance_allocation_canvas)
 
-        self.layout.addWidget(self.update_button, 0, 0)
-        self.layout.addLayout(self.chart_layout, 1, 0)
-        self.layout.addWidget(self.next_month_button, 2, 0)
-        
+        self.forecasted_return_button = QPushButton("Forecasted Return")
+        self.layout.addWidget(self.forecasted_return_button)
+
+        self.forecast_figure = Figure(figsize=(10, 16))
+        self.forcast_canvas = FigureCanvasQTAgg(self.forecast_figure)
+        self.layout.addWidget(self.forcast_canvas)
+
         self.update_button.clicked.connect(self.update_chart)
         self.next_month_button.clicked.connect(self.next_month_chart)
-        
-        self.setLayout(self.layout)
+        self.forecasted_return_button.clicked.connect(self.update_forecast)
 
-    month_counter = 1  
+        self.setLayout(self.layout)
+        self.setMinimumHeight(900)
+
+    month_counter = 1 
+
+
     def update_chart(self):
         allocation.allocate(allocation.balance, allocation.deposit, allocation.user)
 
@@ -193,8 +204,6 @@ class BudgetWindow(QWidget):
 
         self.canvas.draw()
         self.balance_allocation_canvas.draw()
-    
-    
 
     def next_month_chart(self):
         self.month_counter+=1
@@ -219,6 +228,36 @@ class BudgetWindow(QWidget):
 
         self.canvas.draw()
         self.balance_allocation_canvas.draw()
+    
+    def update_forecast(self):
+        self.tempdict = {"Liquid": 1, "ST Fixed Income": 1.05, "LT Fixed Income": 1.042, "ETF": 1.09, "Tech": financials.TOP25_ROI + 1, "CurrRetirement": 1.06}
+        year_interest = {}
+
+        for key in allocation.balance.keys():
+            allocation.balance[key] = allocation.balance[key] * self.tempdict[key]
+        
+        allocation.user['Age']+=1
+        allocation.allocate(allocation.balance, allocation.user['Salary'], allocation.user)
+
+        balance_data = list(allocation.balance.values())
+        balance_labels = list(allocation.balance.keys())
+
+        self.forecast_figure.clear()
+        ax = self.forecast_figure.add_subplot(111)
+        bars_current = ax.bar(balance_labels, balance_data)
+        ax.set_xlabel('Balance Types')
+        ax.set_ylabel('Amount')
+        ax.set_title('Balance Distribution After Year of Interest + A Year of Salary')
+        ax.set_xticklabels(balance_labels, rotation=0)
+        self.forecast_figure.tight_layout()
+        
+        for bar in bars_current:
+            height = bar.get_height()
+            rounded_height = round(height, 2)
+            formatted_height = f'${rounded_height:,.2f}'
+            ax.text(bar.get_x() + bar.get_width() / 2, height / 2, formatted_height, ha='center', va='bottom')
+
+        self.forcast_canvas.draw()
         
 
 class ChatWindow(QWidget):
@@ -247,7 +286,7 @@ class ChatWindow(QWidget):
 
         self.setLayout(self.layout)
 
-        openai.api_key = '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'
+        openai.api_key = 'insert api key here'
 
         self.chat_log.append("Meet our AI-powered financial advisor, willing to answer any and all financial questions!")
         self.chat_log.append(' ')
@@ -285,7 +324,10 @@ class ChatWindow(QWidget):
         self.chat_log.append(' ')
         self.user_input.clear()
 
+
+
 app = QApplication(sys.argv)
 main_window = MainWindow()
 main_window.show()
 sys.exit(app.exec_())
+
