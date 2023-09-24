@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
     def update_salary(self):
         salary = int(self.salary_field.text())
         allocation.user['Salary'] = salary
-        allocation.balance['Liquid'] = salary * 0.4
+        #allocation.balance['Liquid'] = salary * 0.4
         
 
 
@@ -330,4 +330,3 @@ app = QApplication(sys.argv)
 main_window = MainWindow()
 main_window.show()
 sys.exit(app.exec_())
-

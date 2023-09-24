@@ -38,6 +38,9 @@ class Ui_MainPages(object):
         self.main_pages_layout.setContentsMargins(5, 5, 5, 5)
         self.pages = QStackedWidget(MainPages)
         self.pages.setObjectName(u"pages")
+        
+        
+        
         self.page_1 = QWidget()
         self.page_1.setObjectName(u"page_1")
         self.page_1.setStyleSheet(u"font-size: 14pt")
@@ -78,6 +81,9 @@ class Ui_MainPages(object):
         self.page_1_layout.addWidget(self.welcome_base, 0, Qt.AlignHCenter)
 
         self.pages.addWidget(self.page_1)
+        
+        
+        
         self.page_2 = QWidget()
         self.page_2.setObjectName(u"page_2")
         self.page_2_layout = QVBoxLayout(self.page_2)
@@ -150,21 +156,94 @@ class Ui_MainPages(object):
 
 
         #page 3
+#         self.page_3 = QWidget()
+#         self.page_3.setObjectName(u"page_3")
+#         self.page_3.setStyleSheet(u"QFrame {\n"
+# "	font-size: 16pt;\n"
+# "}")
+#         self.page_3_layout = QVBoxLayout(self.page_3)
+#         self.page_3_layout.setObjectName(u"page_3_layout")
+#         self.empty_page_label = QLabel(self.page_3)
+#         self.empty_page_label.setObjectName(u"empty_page_label")
+#         self.empty_page_label.setFont(font)
+#         self.empty_page_label.setAlignment(Qt.AlignCenter)
+
+#         self.page_3_layout.addWidget(self.empty_page_label)
+
+#         self.row_6_layout = QHBoxLayout()
+#         self.row_6_layout.setObjectName(u"row_3_layout")
+#         self.verticalLayout.addLayout(self.row_3_layout)
+#         self.row_7_layout = QHBoxLayout()
+#         self.row_7_layout.setObjectName(u"row_3_layout")
+#         self.verticalLayout.addLayout(self.row_3_layout)
+
+#         self.pages.addWidget(self.page_3)
+
         self.page_3 = QWidget()
         self.page_3.setObjectName(u"page_3")
-        self.page_3.setStyleSheet(u"QFrame {\n"
-"	font-size: 16pt;\n"
-"}")
-        self.page_3_layout = QVBoxLayout(self.page_3)
-        self.page_3_layout.setObjectName(u"page_3_layout")
-        self.empty_page_label = QLabel(self.page_3)
-        self.empty_page_label.setObjectName(u"empty_page_label")
-        self.empty_page_label.setFont(font)
-        self.empty_page_label.setAlignment(Qt.AlignCenter)
+        self.page_3_layout_3 = QVBoxLayout(self.page_3)
+        self.page_3_layout_3.setSpacing(5)
+        self.page_3_layout_3.setObjectName(u"page_3_layout")
+        self.page_3_layout_3.setContentsMargins(5, 5, 5, 5)
 
-        self.page_3_layout.addWidget(self.empty_page_label)
+        # Create a scroll area for page 3
+        self.scroll_area_3 = QScrollArea(self.page_3)
+        self.scroll_area_3.setObjectName(u"scroll_area_3")
+        self.scroll_area_3.setStyleSheet(u"background: transparent;")
+        self.scroll_area_3.setFrameShape(QFrame.NoFrame)
+        self.scroll_area_3.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area_3.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area_3.setWidgetResizable(True)
 
+        # Create the contents widget for page 3
+        self.contents_3 = QWidget()
+        self.contents_3.setObjectName(u"contents_3")
+        self.scroll_area_3.setWidget(self.contents_3)
+
+        # Create a vertical layout for the contents of page 3
+        self.verticalLayout_3 = QVBoxLayout(self.contents_3)
+        self.verticalLayout_3.setSpacing(15)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(5, 5, 5, 5)
+
+        # Add widgets to page 3 as needed
+        self.title_label_3 = QLabel(self.contents_3)
+        self.title_label_3.setObjectName(u"title_label_3")
+        self.title_label_3.setMaximumSize(QSize(16777215, 40))
+        font = QFont()
+        font.setPointSize(16)
+        self.title_label_3.setFont(font)
+        self.title_label_3.setStyleSheet(u"font-size: 16pt")
+        self.title_label_3.setAlignment(Qt.AlignCenter)
+        self.verticalLayout_3.addWidget(self.title_label_3)
+
+        self.description_label_3 = QLabel(self.contents_3)
+        self.description_label_3.setObjectName(u"description_label_3")
+        self.description_label_3.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self.description_label_3.setWordWrap(True)
+        self.verticalLayout_3.addWidget(self.description_label_3)
+
+        # Create layouts for rows as needed (e.g., row_6_layout_3, row_7_layout_3)
+
+        
+
+        # Add page 3 to the stacked widget
         self.pages.addWidget(self.page_3)
+
+        # Add rows to the vertical layout
+        self.row_6_layout_3 = QVBoxLayout()
+        self.row_6_layout_3.setObjectName(u"row_6_layout")
+
+        self.verticalLayout.addLayout(self.row_6_layout_3)
+
+        self.row_7_layout_3 = QVBoxLayout()
+        self.row_7_layout_3.setObjectName(u"row_7_layout")
+
+        self.verticalLayout.addLayout(self.row_7_layout_3)
+
+        # Add the scroll area to the page layout
+        self.page_3_layout_3.addWidget(self.scroll_area_3)
+
 
 
 
@@ -203,7 +282,7 @@ class Ui_MainPages(object):
         self.label.setText(QCoreApplication.translate("MainPages", u"Change Banking For the Better.", None))
         self.title_label.setText(QCoreApplication.translate("MainPages", u"Calculate the Best Way to Grow Your Money!", None))
         self.description_label.setText(QCoreApplication.translate("MainPages", u"By using your age, salary, balance deposit, and what kind of financial growth you are looking for,\n we calculate the best way to allocate your money.", None))
-        self.empty_page_label.setText(QCoreApplication.translate("MainPages", u"Empty Page", None))
+        #self.empty_page_label.setText(QCoreApplication.translate("MainPages", u"Empty Page", None))
     # retranslateUi
 
 

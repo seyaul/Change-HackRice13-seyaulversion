@@ -74,45 +74,45 @@ class SetupMainWindow:
             "is_active" : True
         },
         {
-            "btn_icon" : "icon_widgets.svg",
+            "btn_icon" : "calc.svg",
             "btn_id" : "btn_widgets",
-            "btn_text" : "Show Custom Widgets",
-            "btn_tooltip" : "Show custom widgets",
+            "btn_text" : "Calculate",
+            "btn_tooltip" : "Calculate",
             "show_top" : True,
             "is_active" : False
         },
         {
-            "btn_icon" : "icon_add_user.svg",
+            "btn_icon" : "bot.svg",
             "btn_id" : "btn_add_user",
-            "btn_text" : "Add Users",
-            "btn_tooltip" : "Add users",
+            "btn_text" : "Talk To Our ChatBot!",
+            "btn_tooltip" : "ChatBot",
             "show_top" : True,
             "is_active" : False
         },
-        {
-            "btn_icon" : "icon_file.svg",
-            "btn_id" : "btn_test",
-            "btn_text" : "Test",
-            "btn_tooltip" : "Test",
-            "show_top" : True,
-            "is_active" : False
-        },
-        {
-            "btn_icon" : "icon_folder_open.svg",
-            "btn_id" : "btn_open_file",
-            "btn_text" : "Open File",
-            "btn_tooltip" : "Open file",
-            "show_top" : True,
-            "is_active" : False
-        },
-        {
-            "btn_icon" : "icon_save.svg",
-            "btn_id" : "btn_save",
-            "btn_text" : "Save File",
-            "btn_tooltip" : "Save file",
-            "show_top" : True,
-            "is_active" : False
-        },
+        # {
+        #     "btn_icon" : "icon_file.svg",
+        #     "btn_id" : "btn_test",
+        #     "btn_text" : "Test",
+        #     "btn_tooltip" : "Test",
+        #     "show_top" : True,
+        #     "is_active" : False
+        # },
+        # {
+        #     "btn_icon" : "icon_folder_open.svg",
+        #     "btn_id" : "btn_open_file",
+        #     "btn_text" : "Open File",
+        #     "btn_tooltip" : "Open file",
+        #     "show_top" : True,
+        #     "is_active" : False
+        # },
+        # {
+        #     "btn_icon" : "icon_save.svg",
+        #     "btn_id" : "btn_save",
+        #     "btn_text" : "Save File",
+        #     "btn_tooltip" : "Save file",
+        #     "show_top" : True,
+        #     "is_active" : False
+        # },
         # {
         #     "btn_icon" : "icon_info.svg",
         #     "btn_id" : "btn_info",
@@ -301,8 +301,8 @@ class SetupMainWindow:
         # ///////////////////////////////////////////////////////////////
 
         # PAGE 1 - ADD LOGO TO MAIN PAGE
-        self.logo_svg = QSvgWidget(Functions.set_svg_image("trace.svg"))
-        self.logo_svg.setFixedSize(325, 120)
+        self.logo_svg = QSvgWidget(Functions.set_svg_image("changeLogo.svg"))
+        self.logo_svg.setFixedSize(300, 120)
         self.ui.load_pages.logo_layout.addWidget(self.logo_svg, Qt.AlignCenter, Qt.AlignCenter)
         
 

@@ -194,9 +194,9 @@ class UI_MainWindow(object):
         # ADD CUSTOM TITLE BAR TO LAYOUT
         self.title_bar = PyTitleBar(
             parent,
-            logo_width = 125,
+            logo_width = 100,
             app_parent = self.central_widget,
-            logo_image = "trace.svg",
+            logo_image = "brand.svg",
             bg_color = self.themes["app_color"]["bg_two"],
             div_color = self.themes["app_color"]["bg_three"],
             btn_bg_color = self.themes["app_color"]["bg_two"],
@@ -209,7 +209,7 @@ class UI_MainWindow(object):
             context_color = self.themes["app_color"]["context_color"],
             dark_one = self.themes["app_color"]["dark_one"],
             text_foreground = self.themes["app_color"]["text_foreground"],
-            radius = 8,
+            radius = 0,
             font_family = self.settings["font"]["family"],
             title_size = self.settings["font"]["title_size"],
             is_custom_title_bar = self.settings["custom_title_bar"]
